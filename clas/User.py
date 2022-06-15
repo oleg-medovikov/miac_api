@@ -77,7 +77,7 @@ class User(BaseModel):
         else:
             return False
 
-    async def access(self):
+    async def access(U_ID):
         "Возвращает список доступных комманд"
         sql = f"""
         select 
@@ -86,7 +86,7 @@ class User(BaseModel):
             c.asc_day 
         from access as a
             join commands as c on (a.c_id = c.c_id) 
-                where a.u_id = {self.u_id}
+                where a.u_id = { U_ID }
         """
         return await POSTGRESS_DB.fetch_all(sql)
 

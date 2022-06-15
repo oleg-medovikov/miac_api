@@ -2,19 +2,16 @@ from datetime import date
 from uuid import uuid4, UUID
 from pydantic import BaseModel, Field
 
-
-
 from base import POSTGRESS_DB, t_commands
-from func import *
 
 class Command(BaseModel):
-    c_id : int
-    c_category : str
-    c_name : str
+    c_id        : int
+    c_category  : str
+    c_name      : str
     c_procedure : str
-    c_arg : str
+    c_arg       : str
     return_file : bool
-    asc_day : bool
+    asc_day     : bool
 
     async def add(self):
         "добавление новой команды"
@@ -36,7 +33,7 @@ class Command(BaseModel):
         
         return await POSTGRESS_DB.fetch_all(query)
     
-    async def get(C_ID):
+    async def get_by_id(C_ID):
         "Получение команды по айдишнику"
         query = t_commands.select(t_commands.c.c_id == int(C_ID))
         res = await POSTGRESS_DB.fetch_one(query)

@@ -30,6 +30,15 @@ async def all_users(U_ID: Optional[int] = Header(None)):
 
     return await User.all()
 
+@app.get("/user_commands", tags=["users"],)
+async def all_users(U_ID: Optional[int] = Header(None)):
+    if U_ID is None:
+        return None
+
+    if not await User.check(U_ID):
+        return None
+
+    return await User.access( U_ID )
 
 @app.post("/add_user", tags=["users"],)
 async def add_user(
