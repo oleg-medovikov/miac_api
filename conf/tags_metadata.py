@@ -7,6 +7,10 @@ tags_metadata = [
         "name" : "commands",
         "description" : "Операции с коммандами для бота",
     },
+    {
+        "name" : "dirs",
+        "description" : "Операции с директориями для бота",
+    },
 
 
 ]
