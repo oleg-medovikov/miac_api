@@ -7,3 +7,5 @@ from .dir       import *
 from .access    import *
 from .task      import *
 
+from .favicon   import *
+

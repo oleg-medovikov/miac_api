@@ -1,0 +1,7 @@
+from .app import app
+from conf import FAVICON_URL
+
+from fastapi.responses import RedirectResponse
+@app.get('/favicon.ico')
+async def favicon():
+    return RedirectResponse( FAVICON_URL )

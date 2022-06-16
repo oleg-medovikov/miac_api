@@ -6,3 +6,5 @@ DATABASE_POSTGRESS = config('DATABASE_POSTGRESS', cast=str)
 
 TOKEN = config('TOKEN', cast=str)
 
+FAVICON_URL = config('FAVICON_URL', cast=str)
+
