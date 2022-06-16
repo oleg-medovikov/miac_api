@@ -50,12 +50,14 @@ class User(BaseModel):
     
     async def get_by_id(U_ID):
         "Взять пользователя по id"
-        query = t_users.select(t_users.c.u_id == U_ID)
+        query = t_users.select(t_users.c.u_id == U_ID )
 
         res = await POSTGRESS_DB.fetch_one(query)
 
         if not res is None:
             return User(**res)
+        else:
+            return {'mess' : 'Нет такого пользователя'}
 
 
     async def check(U_ID) -> bool:

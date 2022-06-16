@@ -8,10 +8,10 @@ from conf import TOKEN
 @app.post("/add_task", tags=["tasks"],)
 async def add_task(
         KEY : Optional[set] = Header(None),
-        U_ID: Optional[int] = Header(None),
+        UID : Optional[int] = Header(None),
         TASK: Task = Body(None)):
     "Добавим задачу в очередь на выполнение"
-    if U_ID is None \
+    if UID is None \
         or TASK is None \
         or KEY != TOKEN:
         return None
@@ -34,7 +34,7 @@ async def get_task(
 
 @app.post("/stop_task", tags=["tasks"],)
 async def stop_task(
-        KEY: Optional[str] = Header(None),
+        KEY : Optional[str] = Header(None),
         TASK: Task = Body(None)):
     """Закончить выполнять задачу
     проставить время окончания и комментарий"""
@@ -57,7 +57,7 @@ async def restart_tasks(
 
 @app.post("/get_users_list", tags=["tasks"],)
 async def get_users_list(
-        KEY: Optional[str] = Header(None),
+        KEY : Optional[str] = Header(None),
         TASK: Task = Body(None)):
     """Получить для существующей задачи список 
     пользователей для рассылки.

@@ -19,6 +19,11 @@ tags_metadata = [
         "name" : "tasks",
         "description" : "Операции с пользовательскими задачами",
     },
+    {
+        "name" : "choice",
+        "description" : "Операции с пользовательским выбором",
+    },
+
 
 
 

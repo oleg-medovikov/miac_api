@@ -6,6 +6,7 @@ from .command   import *
 from .dir       import *
 from .access    import *
 from .task      import *
+from .choice    import *
 
 from .favicon   import *
 

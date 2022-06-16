@@ -14,9 +14,9 @@ class Choice(BaseModel):
         query = t_choice.insert().values(self.__dict__)
         await POSTGRESS_DB.execute(query)
 
-    async def delete(self):
+    async def delete( U_ID ):
         """Удалить выбор пользователя"""
-        query = t_choice.delete(t_choice.c.u_id == self.u_id)
+        query = t_choice.delete(t_choice.c.u_id == U_ID )
         await POSTGRESS_DB.execute(query)
 
     async def get(U_ID):

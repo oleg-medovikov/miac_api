@@ -5,65 +5,77 @@ from fastapi import Header, Body
 from clas import User
 from conf import TOKEN
 
+
+@app.get("/get_user_by_id", tags=["users"],)
+async def get_user_by_id(
+        KEY: Optional[str] = Header(None),
+        UID: Optional[int] = Header(None)):
+    "Получить пользователя по id telegram"
+    print( KEY, UID)
+    if UID is None or KEY != TOKEN:
+        return None
+
+    return await User.get_by_id( UID )
+
 @app.get("/is_known", tags=["users"],)
 async def is_known(
         KEY: Optional[str] = Header(None),
-        U_ID: Optional[int] = Header(None)):
+        UID: Optional[int] = Header(None)):
     "Проверить id telegram, наличие в базе"
-    if U_ID is None or KEY != TOKEN:
+    if UID is None or KEY != TOKEN:
         return None
 
-    return await User.check(U_ID)
+    return await User.check(UID)
 
 @app.get("/is_admin", tags=["users"],)
 async def is_admin(
         KEY: Optional[str] = Header(None),
-        U_ID: Optional[int] = Header(None)):
+        UID: Optional[int] = Header(None)):
     "Проверить id telegram, является ли админом"
-    if U_ID is None or KEY != TOKEN:
+    if UID is None or KEY != TOKEN:
         return None
 
-    return await User.admin(U_ID)
+    return await User.admin(UID)
 
 @app.get("/all_users", tags=["users"],)
 async def all_users(
         KEY: Optional[str] = Header(None),
-        U_ID: Optional[int] = Header(None)):
+        UID: Optional[int] = Header(None)):
     "Получить список всех пользователей"
-    if U_ID is None or KEY != TOKEN:
+    if UID is None or KEY != TOKEN:
         return None
 
-    if not await User.admin(U_ID):
+    if not await User.admin(UID):
         return {'mess': 'Недостаточно прав'}
 
     return await User.all()
 
 @app.get("/user_commands", tags=["users"],)
-async def all_users(
+async def user_commands(
         KEY: Optional[str] = Header(None),
-        U_ID: Optional[int] = Header(None)):
+        UID: Optional[int] = Header(None)):
     "Получить команды данного пользователя, список кнопочек в боте"
-    if U_ID is None or KEY != TOKEN:
+    if UID is None or KEY != TOKEN:
         return None
 
-    if not await User.check(U_ID):
+    if not await User.check(UID):
         return None
 
-    return await User.access( U_ID )
+    return await User.access( UID )
 
 @app.post("/add_user", tags=["users"],)
 async def add_user(
         KEY: Optional[str] = Header(None),
-        U_ID: Optional[int] = Header(None),
+        UID: Optional[int] = Header(None),
         USER: User = Body(None) ):
     """Добавить пользователя или 
     изменить его параметры, если id существует"""
-    if U_ID is None \
+    if UID is None \
         or USER is None \
         or KEY != TOKEN:
         return None
     
-    if not await User.admin( U_ID ):
+    if not await User.admin( UID ):
         return {'mess' : 'Недостаточно прав'}
 
     return await USER.add()
@@ -71,18 +83,16 @@ async def add_user(
 @app.delete("/delete_user", tags=["users"],)
 async def delete_user(
         KEY: Optional[str] = Header(None),
-        U_ID: Optional[int] = Header(None),
-        DELETE_ID: Optional[int] = Header(None)):
+        UID: Optional[int] = Header(None),
+        DELETEID: Optional[int] = Header(None)):
     """Удалить пользователя по его id,
     использовать в крайнем случае, если срочно надо"""
-    if U_ID is None \
-        or DELETE_ID is None \
+    if UID is None \
+        or DELETEID is None \
         or KEY != TOKEN:
         return None
     
-    if not await User.admin( U_ID ):
+    if not await User.admin( UID ):
         return {'mess' : 'Недостаточно прав'}
 
-    
-    return await USER.delete( DELETE_ID )
-       
+    return await USER.delete( DELETEID )
