@@ -3,15 +3,8 @@ from typing import Optional
 from datetime import datetime
 from uuid import uuid4, UUID
 from sqlalchemy import and_
-from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
-import warnings
-warnings.filterwarnings("ignore")
 
 from base import POSTGRESS_DB, t_tasks
-from func import functions
-
-class my_except(Exception):
-    pass
 
 class Task(BaseModel):
     t_id        : UUID = Field(default_factory=uuid4)
@@ -44,34 +37,12 @@ class Task(BaseModel):
                         .where(t_tasks.c.t_id == res['t_id'])\
                         .values(users_list = res['users_list'] + ',' + str(self.client))
                 await POSTGRESS_DB.execute(query)
-                return False
+                return {'mess' : 'Задача уже создана'}
         else:
             query = t_tasks.insert().values(self.__dict__)
             await POSTGRESS_DB.execute(query)
-            
-            #query = t_tasks.update()\
-            #        .where(t_tasks.c.t_id == self.t_id)\
-            #        .values(time_start = datetime.now())
-        
-            #await POSTGRESS_DB.execute(query)
 
-            return True
-
-    async def start(self):
-        """Начать выполнение задачи"""
-        # Запускаем новый тред с процедурой
-        if self.c_arg == 'no':
-            FUNC = functions[self.c_func]()
-        else:
-            FUNC = functions[self.c_func](self.c_arg)
-
-        try:
-            RES = await FUNC
-        except Exception as e:
-            raise my_except(str(e))
-        else:
-            return RES
-
+            return {'mess' : 'Задача добавлена, ожидайте выполнения'}
 
     async def get():
         """Взять доступную задачу"""
