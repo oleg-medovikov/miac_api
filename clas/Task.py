@@ -19,7 +19,6 @@ class Task(BaseModel):
     time_stop   : Optional[datetime]
     comment     : Optional[str]
 
-
     async def add(self):
         """Создание нового задания
             Нужно проверить, есть ли в пуле 

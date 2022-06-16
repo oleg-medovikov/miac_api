@@ -28,6 +28,12 @@ class User(BaseModel):
 
         return {'mess' : 'ok'}
 
+    async def delete(U_ID):
+        "Удаление пользователя"
+        query = t_users.delete(t_users.c.u_id == U_ID)
+        await POSTGRESS_DB.execute(query)
+
+
     async def add_people(self):
         "Добавим людей которые писали боту"
         query = t_people.select(t_people.c.u_id == self.u_id)

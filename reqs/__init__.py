@@ -5,3 +5,5 @@ from .user      import *
 from .command   import *
 from .dir       import *
 from .access    import *
+from .task      import *
+

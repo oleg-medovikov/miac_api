@@ -1,6 +1,6 @@
 from starlette.config import Config
 
-config = Config('.conf')
+config = Config('../.config/bot/.conf')
 
 DATABASE_POSTGRESS = config('DATABASE_POSTGRESS', cast=str)
 

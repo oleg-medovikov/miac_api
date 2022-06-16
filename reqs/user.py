@@ -1,28 +1,36 @@
 from .app import app
 from typing import Optional
 from fastapi import Header, Body
-from fastapi import Request
 
 from clas import User
-
+from conf import TOKEN
 
 @app.get("/is_known", tags=["users"],)
-async def is_known(U_ID: Optional[int] = Header(None)):
-    if U_ID is None:
+async def is_known(
+        KEY: Optional[str] = Header(None),
+        U_ID: Optional[int] = Header(None)):
+    "Проверить id telegram, наличие в базе"
+    if U_ID is None or KEY != TOKEN:
         return None
 
     return await User.check(U_ID)
 
 @app.get("/is_admin", tags=["users"],)
-async def is_admin(U_ID: Optional[int] = Header(None)):
-    if U_ID is None:
+async def is_admin(
+        KEY: Optional[str] = Header(None),
+        U_ID: Optional[int] = Header(None)):
+    "Проверить id telegram, является ли админом"
+    if U_ID is None or KEY != TOKEN:
         return None
 
     return await User.admin(U_ID)
 
 @app.get("/all_users", tags=["users"],)
-async def all_users(U_ID: Optional[int] = Header(None)):
-    if U_ID is None:
+async def all_users(
+        KEY: Optional[str] = Header(None),
+        U_ID: Optional[int] = Header(None)):
+    "Получить список всех пользователей"
+    if U_ID is None or KEY != TOKEN:
         return None
 
     if not await User.admin(U_ID):
@@ -31,8 +39,11 @@ async def all_users(U_ID: Optional[int] = Header(None)):
     return await User.all()
 
 @app.get("/user_commands", tags=["users"],)
-async def all_users(U_ID: Optional[int] = Header(None)):
-    if U_ID is None:
+async def all_users(
+        KEY: Optional[str] = Header(None),
+        U_ID: Optional[int] = Header(None)):
+    "Получить команды данного пользователя, список кнопочек в боте"
+    if U_ID is None or KEY != TOKEN:
         return None
 
     if not await User.check(U_ID):
@@ -42,16 +53,36 @@ async def all_users(U_ID: Optional[int] = Header(None)):
 
 @app.post("/add_user", tags=["users"],)
 async def add_user(
+        KEY: Optional[str] = Header(None),
         U_ID: Optional[int] = Header(None),
         USER: User = Body(None) ):
-
-    if U_ID is None or USER is None:
+    """Добавить пользователя или 
+    изменить его параметры, если id существует"""
+    if U_ID is None \
+        or USER is None \
+        or KEY != TOKEN:
         return None
     
     if not await User.admin( U_ID ):
         return {'mess' : 'Недостаточно прав'}
 
     return await USER.add()
+ 
+@app.delete("/delete_user", tags=["users"],)
+async def delete_user(
+        KEY: Optional[str] = Header(None),
+        U_ID: Optional[int] = Header(None),
+        DELETE_ID: Optional[int] = Header(None)):
+    """Удалить пользователя по его id,
+    использовать в крайнем случае, если срочно надо"""
+    if U_ID is None \
+        or DELETE_ID is None \
+        or KEY != TOKEN:
+        return None
     
+    if not await User.admin( U_ID ):
+        return {'mess' : 'Недостаточно прав'}
 
-
+    
+    return await USER.delete( DELETE_ID )
+       

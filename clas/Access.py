@@ -15,6 +15,7 @@ class Access(BaseModel):
 
     async def delete_all():
         await POSTGRESS_DB.execute("TRUNCATE TABLE access;")
+        return {'mess': 'access deleted'}
 
     async def cheak(U_ID, C_ID):
         "Проверка пользователя на наличие прав на исполнение задачи"
@@ -26,4 +27,5 @@ class Access(BaseModel):
 
         if res is None:
             return False
-        else return True
+        else:
+            return True
