@@ -21,6 +21,23 @@ async def add_task(
 
     return await TASK.add()
 
+@app.get("/get_all_tasks", tags=["tasks"],)
+async def get_all_tasks(
+        KEY: Optional[str] = Header(None),
+        UID: Optional[int] = Header(None)):
+    """Получить список заданий, которыми занимается бот"""
+    if  UID is None \
+        or KEY != TOKEN:
+        return None
+    if not User.check( UID ):
+        return None
+    
+    if not User.admin( UID ):
+        return await Task.get_all_tasks_user( UID )
+
+    return await Task.get_all_tasks()
+
+
 
 @app.get("/get_task", tags=["tasks"],)
 async def get_task(
