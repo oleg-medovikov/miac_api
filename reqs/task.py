@@ -29,10 +29,11 @@ async def get_all_tasks(
     if  UID is None \
         or KEY != TOKEN:
         return None
-    if not User.check( UID ):
+
+    if not await User.check( UID ):
         return None
     
-    if not User.admin( UID ):
+    if not await User.admin( UID ):
         return await Task.get_all_tasks_user( UID )
 
     return await Task.get_all_tasks()

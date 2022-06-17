@@ -17,6 +17,20 @@ async def get_user_by_id(
 
     return await User.get_by_id( UID )
 
+@app.get("/get_all_users", tags=["users"],)
+async def get_all_users(
+        KEY: Optional[str] = Header(None),
+        UID: Optional[int] = Header(None)):
+    "Получить пользователя по id telegram"
+    print( KEY, UID )
+    if UID is None or KEY != TOKEN:
+        return None
+    if not await User.admin(UID):
+        return None
+
+    return await User.all
+
+
 @app.get("/is_known", tags=["users"],)
 async def is_known(
         KEY: Optional[str] = Header(None),

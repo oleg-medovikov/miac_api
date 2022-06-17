@@ -73,7 +73,7 @@ class Task(BaseModel):
             join users as u  on(u.u_id = t.client)
             join commands as c on(c.c_id = t.c_id)
             order by t.time_create desc"""
-        return POSTGRESS_DB.fetch_all( sql )
+        return await POSTGRESS_DB.fetch_all( sql )
             
     async def get_all_tasks_user( U_ID ):
         """получить список всех задач пользователя"""
@@ -94,7 +94,7 @@ class Task(BaseModel):
         where t.client = { U_ID }
         order by t.time_create desc
             """
-        return POSTGRESS_DB.fetch_all( sql )
+        return await POSTGRESS_DB.fetch_all( sql )
  
     async def restart():
         """Рестартануть выполнение задач, если бот перезапустился"""
