@@ -36,7 +36,7 @@ class Task(BaseModel):
                         .where(t_tasks.c.t_id == res['t_id'])\
                         .values(users_list = res['users_list'] + ',' + str(self.client))
                 await POSTGRESS_DB.execute(query)
-                return {'mess' : 'Задача уже создана'}
+            return {'mess' : 'Задача уже создана'}
         else:
             query = t_tasks.insert().values(self.__dict__)
             await POSTGRESS_DB.execute(query)

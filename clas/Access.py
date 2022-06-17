@@ -31,7 +31,7 @@ class Access(BaseModel):
 
     async def cheak(U_ID, C_ID):
         "Проверка пользователя на наличие прав на исполнение задачи"
-        query = t_access.select().values(and_(
+        query = t_access.select().where(and_(
             t_access.c.u_id == U_ID,
             t_access.c.c_id == C_ID
                 ))

@@ -7,16 +7,20 @@ from conf import TOKEN
 
 @app.post("/add_task", tags=["tasks"],)
 async def add_task(
-        KEY : Optional[set] = Header(None),
+        KEY : Optional[str] = Header(None),
         UID : Optional[int] = Header(None),
         TASK: Task = Body(None)):
     "Добавим задачу в очередь на выполнение"
+    
     if UID is None \
         or TASK is None \
         or KEY != TOKEN:
-        return None
+        print(TASK)
+        print(UID)
+        print(KEY)
+        return {'test'}
 
-    if not await Access.cheak( U_ID, C_ID ):
+    if not await Access.cheak( UID, TASK.c_id ):
         return {'mess': 'Недостаточно прав'}
 
     return await TASK.add()
@@ -38,8 +42,6 @@ async def get_all_tasks(
 
     return await Task.get_all_tasks()
 
-
-
 @app.get("/get_task", tags=["tasks"],)
 async def get_task(
         KEY: Optional[str] = Header(None)):
@@ -59,7 +61,7 @@ async def stop_task(
     if  KEY != TOKEN:
         return None
 
-    return await Task.stop()
+    return await TASK.stop()
 
 @app.post("/restart_tasks", tags=["tasks"],)
 async def restart_tasks(
@@ -73,8 +75,8 @@ async def restart_tasks(
     return await Task.restart()
 
 
-@app.post("/get_users_list", tags=["tasks"],)
-async def get_users_list(
+@app.get("/get_task_users_list", tags=["tasks"],)
+async def get_task_users_list(
         KEY : Optional[str] = Header(None),
         TASK: Task = Body(None)):
     """Получить для существующей задачи список 

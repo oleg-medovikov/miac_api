@@ -8,15 +8,10 @@ from conf import TOKEN
 @app.get("/get_command", tags=["commands"],)
 async def get_command(
         KEY: Optional[str] = Header(None),
-        UID: Optional[int] = Header(None),
         CID: Optional[int] = Header(None)):
     "Получить объект command по его id"
-    if UID is None \
-        or CID is None \
+    if CID is None \
         or KEY != TOKEN:
-        return None
-
-    if not await User.check(UID):
         return None
 
     return await Command.get_by_id( CID )
