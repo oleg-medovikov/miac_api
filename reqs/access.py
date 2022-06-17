@@ -3,6 +3,23 @@ from typing import Optional
 from fastapi import Header, Body
 
 from clas import User, Access
+from conf import TOKEN
+
+@app.get("/get_access", tags=["access"],)
+async def add_access(
+        KEY: Optional[str] = Header(None),
+        UID: Optional[int] = Header(None)):
+    """Отдаем все аксесы полностью"""
+    if UID is None \
+        or KEY != TOKEN:
+        return None
+
+    if not await User.admin( UID ):
+        return None
+
+    return await Access.get_all()
+ 
+
 
 @app.post("/add_access", tags=["access"],)
 async def add_access(

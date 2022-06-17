@@ -7,6 +7,18 @@ class Access(BaseModel):
     u_id : int
     c_id : int
     comment : str
+    
+    async def get_all():
+        "Получить все аксесы целиком"
+        sql = """
+        select a.u_id, u.fio, a.c_id, c.c_name, a.comment from access as a
+        join users as u    on(u.u_id = a.u_id)
+        join commands as c on(c.c_id = a.c_id)
+        order by a.u_id, a.c_id
+        """
+
+        return await POSTGRESS_DB.fetch_all(sql)
+
 
     async def add(self):
         "Добавление доступа к комманде"
