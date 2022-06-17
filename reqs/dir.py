@@ -8,22 +8,17 @@ from conf import TOKEN
 @app.get("/get_dir", tags=["dirs"],)
 async def get_dir(
         KEY : Optional[str] = Header(None),
-        UID : Optional[int] = Header(None),
         NAME: Optional[str] = Body(None)):
     "Получить директорию по её названию" 
-    if UID is None \
-        or NAME is None \
+    if NAME is None \
         or KEY != TOKEN:
-        return None
-
-    if not await User.check( UID ):
         return None
 
     return await Dir.get( NAME )
 
 
 @app.post("/add_dir", tags=["dirs"],)
-async def get_dir(
+async def add_dir(
         KEY: Optional[str] = Header(None),
         UID: Optional[int] = Header(None),
         DIR: Dir = Body(None)):
