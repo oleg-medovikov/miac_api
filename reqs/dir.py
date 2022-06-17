@@ -16,6 +16,19 @@ async def get_dir(
 
     return await Dir.get( NAME )
 
+@app.get("/get_all_dirs", tags=["dirs"],)
+async def get_all_dirsdir(
+        KEY : Optional[str] = Header(None),
+        UID : Optional[int] = Header(None)):
+    "Получить директорию по её названию" 
+    if UID is None \
+        or KEY != TOKEN:
+        return None
+
+    if not await User.admin( UID ):
+        return None
+
+    return await Dir.get_all()
 
 @app.post("/add_dir", tags=["dirs"],)
 async def add_dir(

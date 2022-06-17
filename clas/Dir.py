@@ -9,6 +9,10 @@ class Dir(BaseModel):
     description : str
     working     : bool
 
+    async def get_all():
+        "Получить все директории "
+        query = "select * from dirs "
+        return await POSTGRESS_DB.fetch_all(query)
 
     async def get(NAME) -> str:
         "Получить директорию по имени"
