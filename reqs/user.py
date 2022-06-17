@@ -21,7 +21,7 @@ async def get_user_by_id(
 async def get_all_users(
         KEY: Optional[str] = Header(None),
         UID: Optional[int] = Header(None)):
-    "Получить пользователя по id telegram"
+    "Получить всех пользователей из базы"
     print( KEY, UID )
     if UID is None or KEY != TOKEN:
         return None
