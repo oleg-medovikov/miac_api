@@ -28,7 +28,7 @@ async def get_all_users(
     if not await User.admin(UID):
         return None
 
-    return await User.all
+    return await User.all()
 
 
 @app.get("/is_known", tags=["users"],)

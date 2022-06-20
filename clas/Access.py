@@ -22,6 +22,11 @@ class Access(BaseModel):
 
     async def add(self):
         "Добавление доступа к комманде"
+        query = t_access.delete().where(and_(
+            t_access.c.u_id == self.u_id,
+            t_access.c.c_id == self.c_id
+            ))
+        await POSTGRESS_DB.execute(query)
         query = t_access.insert().values(self.__dict__)
         await POSTGRESS_DB.execute(query)
 
