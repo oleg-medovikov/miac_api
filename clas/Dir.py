@@ -11,7 +11,7 @@ class Dir(BaseModel):
 
     async def get_all():
         "Получить все директории "
-        query = "select * from dirs "
+        query = "select * from dirs order by d_id"
         return await POSTGRESS_DB.fetch_all(query)
 
     async def get(NAME) -> str:

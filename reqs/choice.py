@@ -52,7 +52,7 @@ async def get_user_choice(
         or KEY != TOKEN:
         return None
     
-    return await Choice.get( UID )
+    return await Choice.get_choice( UID )
 
 
 

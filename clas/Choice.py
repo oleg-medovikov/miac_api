@@ -19,7 +19,7 @@ class Choice(BaseModel):
         query = t_choice.delete(t_choice.c.u_id == U_ID )
         await POSTGRESS_DB.execute(query)
 
-    async def get(U_ID):
+    async def get_choice(U_ID):
         """Получить выбор пользователя"""
         query = t_choice.select(t_choice.c.u_id == U_ID)
         res = await POSTGRESS_DB.fetch_one(query)
