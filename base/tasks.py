@@ -1,6 +1,6 @@
 from .postgress import metadata
 
-from sqlalchemy import Table, Column, Integer, String, DateTime
+from sqlalchemy import Table, Column, Integer, String, DateTime, BigInteger
 from sqlalchemy.dialects.postgresql import UUID
 import uuid
 
@@ -9,7 +9,7 @@ t_tasks = Table(
     metadata,
     Column('t_id', UUID(), primary_key=True, default=uuid.uuid4), #идентификатор задания
     Column('time_create', DateTime), # Время создания задачи
-    Column('client', Integer),       # номер юзера создавшего задание
+    Column('client', BigInteger),       # номер юзера создавшего задание
     Column('task_type', String),     # тип события
     Column('c_id', Integer),         # номер команды
     Column('c_func', String),        # функция команды
