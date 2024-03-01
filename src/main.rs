@@ -1,11 +1,12 @@
-use actix_web::{web::Data, App, HttpServer};
+use actix_web::{web::Data, App, HttpServer, http::header};
+use actix_cors::Cors;
 use dotenv::dotenv;
-use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
+use sqlx::{postgres::PgPoolOptions, Pool, PgPool, Postgres};
 
 mod base;
 use base::create_tables::create_tables;
-mod services;
-use services::{create_user_article, fetch_user_articles, fetch_users};
+mod users;
+use users::login::user_login;
 
 
 pub struct AppState {
@@ -16,7 +17,7 @@ pub struct AppState {
 async fn main() -> std::io::Result<()> {
     dotenv().ok();
     let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-    let pool = PgPoolOptions::new()
+    let pool:PgPool = PgPoolOptions::new()
         .max_connections(5)
         .connect(&database_url)
         .await
@@ -33,11 +34,19 @@ async fn main() -> std::io::Result<()> {
     }
 
     HttpServer::new(move || {
+        let cors = Cors::default()
+            .allowed_origin("http://192.168.86.68:8081")
+            .allowed_methods(vec!["GET", "POST"])
+            .allowed_headers(vec![header::AUTHORIZATION, header::ACCEPT])
+            .allowed_header(header::CONTENT_TYPE)
+            .max_age(3600);
         App::new()
+            .wrap(cors)
             .app_data(Data::new(AppState { db: pool.clone() }))
-            .service(fetch_users)
-            .service(fetch_user_articles)
-            .service(create_user_article)
+            .service(user_login)
+            //.service(fetch_users)
+            //.service(fetch_user_articles)
+            //.service(create_user_article)
     })
     .bind(("0.0.0.0", 8080))?
     .run()
