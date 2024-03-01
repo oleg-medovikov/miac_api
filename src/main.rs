@@ -33,9 +33,11 @@ async fn main() -> std::io::Result<()> {
         }
     }
 
+    let allowed_url = std::env::var("ALLOWED_URL").expect("ALLOWED_URL must be set");
+
     HttpServer::new(move || {
         let cors = Cors::default()
-            .allowed_origin("http://192.168.86.68:8081")
+            .allowed_origin(&allowed_url)
             .allowed_methods(vec!["GET", "POST"])
             .allowed_headers(vec![header::AUTHORIZATION, header::ACCEPT])
             .allowed_header(header::CONTENT_TYPE)
