@@ -32,7 +32,7 @@ pub struct CreateArticleBody {
 pub async fn fetch_users(state: Data<AppState>) -> impl Responder {
     // "GET /users".to_string()
 
-    match sqlx::query_as::<_, User>("SELECT id, first_name, last_name FROM users")
+    match sqlx::query_as::<_, User>("SELECT * FROM users")
         .fetch_all(&state.db)
         .await
     {

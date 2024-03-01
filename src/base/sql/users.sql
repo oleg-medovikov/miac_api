@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
+    tg_id BIGINT NOT NULL UNIQUE,
+    username VARCHAR(255) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    fio VARCHAR(255) NOT NULL,
+    groups VARCHAR(255) NOT NULL,
+    description VARCHAR(255)
+);
