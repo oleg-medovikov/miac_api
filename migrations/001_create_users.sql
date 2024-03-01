@@ -5,5 +5,6 @@ CREATE TABLE IF NOT EXISTS users (
     password_hash VARCHAR(255) NOT NULL,
     fio VARCHAR(255) NOT NULL,
     groups VARCHAR(255) NOT NULL,
-    description VARCHAR(255)
+    description VARCHAR(255),
+    token VARCHAR(255)
 );

@@ -1,10 +1,8 @@
 use actix_web::{web::Data, App, HttpServer, http::header};
 use actix_cors::Cors;
 use dotenv::dotenv;
-use sqlx::{postgres::PgPoolOptions, Pool, PgPool, Postgres};
+use sqlx::{Pool, PgPool, Postgres};
 
-mod base;
-use base::create_tables::create_tables;
 mod users;
 use users::login::user_login;
 
@@ -17,21 +15,12 @@ pub struct AppState {
 async fn main() -> std::io::Result<()> {
     dotenv().ok();
     let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-    let pool:PgPool = PgPoolOptions::new()
-        .max_connections(5)
-        .connect(&database_url)
+    let pool = PgPool::connect(&database_url).await.expect("Не удалось подключиться к базе");
+    // Выполняем миграции
+    sqlx::migrate!("./migrations")
+        .run(&pool)
         .await
-        .expect("Error building a connection pool");
-
-    // создаем таблицы
-    match create_tables(&pool).await {
-        Ok(_) => {
-            println!("Tables created successfully");
-        },
-        Err(err) => {
-            eprintln!("Error creating tables: {}", err);
-        }
-    }
+        .expect("Не удалось создать таблицы");
 
     let allowed_url = std::env::var("ALLOWED_URL").expect("ALLOWED_URL must be set");
 
@@ -54,3 +43,4 @@ async fn main() -> std::io::Result<()> {
     .run()
     .await
 }
+
