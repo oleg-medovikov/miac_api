@@ -1,3 +1,4 @@
+/*
 BEGIN;
 DO
   $do$
@@ -12,6 +13,7 @@ DO
   END
   $do$;
 COMMIT;
+*/ 
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
@@ -30,7 +32,7 @@ INSERT INTO users values(
   1, 200712816, 'MedovikovOE',
   '$2b$12$W4pxNBAhbY9iHDf/XLndUOufVngbPERmFGbhzLLpbKOd/zLGHYxCO',
   'Медовиков О.Е.', 'admin', 'Автор', NULL
-);
+) ON CONFLICT DO NOTHING;
 
 CREATE TABLE IF NOT EXISTS commands (
   id SERIAL PRIMARY KEY,

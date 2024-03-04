@@ -3,6 +3,7 @@ use serde::Deserialize;
 use sqlx::{self,};
 use crate::AppState;
 use bcrypt::{hash, verify, DEFAULT_COST};
+use uuid::Uuid;
 
 
 #[derive(Deserialize)]
@@ -33,7 +34,30 @@ pub async fn user_login(state: Data<AppState>,  credentials: web::Json<Credentia
     
     if let Ok(valid) = verify(credentials.password.as_bytes(), &user_hash) {
         if valid {
-                HttpResponse::Ok().json("Logged in successfully")
+            
+            // Генерируем UUID для токена
+            let token = Uuid::new_v4().to_string();
+
+            // Обновляем строку в базе данных с новым токеном
+            sqlx::query!(
+                r#"
+                UPDATE users
+                SET token = $1
+                WHERE username = $2
+                "#,
+                token,
+                credentials.username
+            )
+            .execute(&state.db)
+            .await
+            .expect("Failed to update user token");
+            
+            // Возвращаем токен в ответе JSON
+            HttpResponse::Ok().json(serde_json::json!({
+                "message": "Logged in successfully",
+                "token": token
+            }))
+
             } else {
                 HttpResponse::Unauthorized().json("Invalid username or password")
             }
