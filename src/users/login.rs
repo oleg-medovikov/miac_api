@@ -2,7 +2,8 @@ use actix_web::{web, web::Data, post, Responder, HttpResponse};
 use serde::Deserialize;
 use sqlx::{self,};
 use crate::AppState;
-use bcrypt::{hash, verify, DEFAULT_COST};
+//use bcrypt::{hash, verify, DEFAULT_COST};
+use bcrypt::verify;
 use uuid::Uuid;
 
 
@@ -29,8 +30,8 @@ pub async fn user_login(state: Data<AppState>,  credentials: web::Json<Credentia
     .await
     .expect("Failed to execute query");
     
-    let hashed_password = hash(credentials.password.as_bytes(), DEFAULT_COST).unwrap();
-    println!("Hashed password: {}", hashed_password);
+    //let hashed_password = hash(credentials.password.as_bytes(), DEFAULT_COST).unwrap();
+    //println!("Hashed password: {}", hashed_password);
     
     if let Ok(valid) = verify(credentials.password.as_bytes(), &user_hash) {
         if valid {

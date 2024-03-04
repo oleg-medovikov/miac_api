@@ -5,6 +5,7 @@ use sqlx::{Pool, PgPool, Postgres};
 
 mod users;
 use users::login::user_login;
+use users::update_password::user_update_password;
 
 
 pub struct AppState {
@@ -35,6 +36,7 @@ async fn main() -> std::io::Result<()> {
             .wrap(cors)
             .app_data(Data::new(AppState { db: pool.clone() }))
             .service(user_login)
+            .service(user_update_password)
             //.service(fetch_users)
             //.service(fetch_user_articles)
             //.service(create_user_article)
