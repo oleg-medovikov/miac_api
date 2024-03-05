@@ -8,6 +8,7 @@ use users::login::user_login;
 use users::update_password::user_update_password;
 use users::user_create::user_create;
 use users::user_update::user_update;
+use users::user_get_all::user_get_all;
 
 
 pub struct AppState {
@@ -41,6 +42,7 @@ async fn main() -> std::io::Result<()> {
             .service(user_update_password)
             .service(user_create)
             .service(user_update)
+            .service(user_get_all)
     })
     .bind(("0.0.0.0", 8080))?
     .run()
