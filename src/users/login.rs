@@ -1,8 +1,7 @@
 use actix_web::{web, web::Data, post, Responder, HttpResponse};
 use serde::Deserialize;
-use sqlx::{self,};
+use sqlx::{self,query_scalar};
 use crate::AppState;
-//use bcrypt::{hash, verify, DEFAULT_COST};
 use bcrypt::verify;
 use uuid::Uuid;
 
@@ -18,20 +17,23 @@ pub async fn user_login(state: Data<AppState>,  credentials: web::Json<Credentia
     // "POST /user_login".to_string()
     let credentials = credentials.into_inner();
 
+    // Ищем пользователя по username
+    let exists: bool = query_scalar(r#"SELECT EXISTS(SELECT 1 FROM users WHERE username = $1 and active = true)"#)
+        .bind(&credentials.username)
+        .fetch_one(&state.db)
+        .await
+        .expect("Failed to execute query");
+
+    if !exists {
+        return HttpResponse::BadRequest().json("Invalid username or password")
+    }
+
     // Получаем хеш пароля из базы данных
-    let user_hash = sqlx::query_scalar!(
-        r#"
-        SELECT password_hash FROM users
-        WHERE username = $1
-        "#,
-        credentials.username
-    )
+    let user_hash: String = query_scalar(r#"SELECT password_hash FROM users WHERE username = $1"#)
+    .bind(&credentials.username)
     .fetch_one(&state.db)
     .await
     .expect("Failed to execute query");
-    
-    //let hashed_password = hash(credentials.password.as_bytes(), DEFAULT_COST).unwrap();
-    //println!("Hashed password: {}", hashed_password);
     
     if let Ok(valid) = verify(credentials.password.as_bytes(), &user_hash) {
         if valid {

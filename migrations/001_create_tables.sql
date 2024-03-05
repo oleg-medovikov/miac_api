@@ -25,13 +25,14 @@ CREATE TABLE IF NOT EXISTS users (
   fio VARCHAR(255) NOT NULL,
   groups VARCHAR(255) NOT NULL,
   description VARCHAR(255) NULL,
+  active BOOLEAN NOT NULL,
   token VARCHAR(255) NULL
 );
 
 INSERT INTO users values(
   1, 200712816, 'MedovikovOE',
   '$2b$12$W4pxNBAhbY9iHDf/XLndUOufVngbPERmFGbhzLLpbKOd/zLGHYxCO',
-  'Медовиков О.Е.', 'admin', 'Автор', NULL
+  'Медовиков О.Е.', 'admin', 'Автор', true, NULL
 ) ON CONFLICT DO NOTHING;
 
 CREATE TABLE IF NOT EXISTS commands (
