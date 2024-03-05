@@ -11,7 +11,8 @@ struct NewUser {
     password:    String,
     fio:         String,
     groups:      String,
-    description: String
+    description: String,
+    active:      bool
 }
 
 #[post("/user_create")]
@@ -50,9 +51,9 @@ pub async fn user_create(state: Data<AppState>,req: HttpRequest, new_user: web::
     let user_id: i32 = sqlx::query_scalar!(
         r#"
         INSERT INTO users (
-            tg_id, username, password_hash, fio, groups, description
+            tg_id, username, password_hash, fio, groups, description, active
         )
-        VALUES ($1, $2, $3, $4, $5, $6)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
         RETURNING id
         "#,
         new_user.tg_id,
@@ -60,7 +61,8 @@ pub async fn user_create(state: Data<AppState>,req: HttpRequest, new_user: web::
         hashed_password,
         new_user.fio,
         new_user.groups,
-        new_user.description
+        new_user.description,
+        new_user.active
     )
     .fetch_one(&state.db)
     .await

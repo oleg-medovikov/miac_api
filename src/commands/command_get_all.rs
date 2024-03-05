@@ -4,18 +4,19 @@ use serde::Serialize;
 use sqlx::{self, FromRow, query_scalar};
 
 #[derive(Serialize, FromRow)]
-struct User {
+struct Command {
     id:          i32,
-    tg_id:       i64,
-    username:    String,
-    fio:         String,
-    groups:      String,
-    description: String,
+    category:    String,
+    name:        String,
+    func:        String,
+    arg:         String,
+    return_file: bool,
+    ask_day:     bool,
     active:      bool
 }
 
-#[get("/user_get_all")]
-pub async fn user_get_all(state: Data<AppState>, req: HttpRequest) -> impl Responder {
+#[get("/command_get_all")]
+pub async fn command_get_all(state: Data<AppState>, req: HttpRequest) -> impl Responder {
     // Получаем токен пользователя из заголовка запроса
     let token = match req.headers().get("Authorization") {
         Some(header_value) => match header_value.to_str() {
@@ -36,19 +37,19 @@ pub async fn user_get_all(state: Data<AppState>, req: HttpRequest) -> impl Respo
         return HttpResponse::BadRequest().json("Invalid token")
     }
 
-    match sqlx::query_as::<_, User>(
+    match sqlx::query_as::<_, Command>(
         "SELECT
-            id, tg_id, username,
-            fio, groups, description,
+            id, category, name, func,
+            arg, return_file, ask_day,
             active
-         FROM users")
+         FROM commands")
         .fetch_all(&state.db)
         .await
     {
-        Ok(users) => HttpResponse::Ok().json(users),
+        Ok(commands) => HttpResponse::Ok().json(commands),
         Err(error) => {
             println!("Failed to execute query: {}", error);
-            HttpResponse::NotFound().json("No users found")
+            HttpResponse::NotFound().json("No commands found")
         }
     }
 }

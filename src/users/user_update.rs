@@ -9,7 +9,8 @@ struct UpdateUser {
     username:    String,
     fio:         String,
     groups:      String,
-    description: String
+    description: String,
+    active:      bool
 }
 
 #[put("/user_update")]
@@ -49,7 +50,8 @@ pub async fn user_update(state: Data<AppState>,req: HttpRequest, update_user: we
             username = $3,
             fio = $4,
             groups = $5,
-            description = $6
+            description = $6,
+            active = $7
         where id = $1
         RETURNING id
         "#,
@@ -58,7 +60,8 @@ pub async fn user_update(state: Data<AppState>,req: HttpRequest, update_user: we
         update_user.username,
         update_user.fio,
         update_user.groups,
-        update_user.description
+        update_user.description,
+        update_user.active
     )
     .fetch_one(&state.db)
     .await
