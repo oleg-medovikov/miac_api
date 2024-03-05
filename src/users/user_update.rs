@@ -51,7 +51,8 @@ pub async fn user_update(state: Data<AppState>,req: HttpRequest, update_user: we
             fio = $4,
             groups = $5,
             description = $6,
-            active = $7
+            active = $7,
+            token = null
         where id = $1
         RETURNING id
         "#,

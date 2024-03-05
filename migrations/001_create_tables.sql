@@ -13,7 +13,13 @@ DO
   END
   $do$;
 COMMIT;
-*/ 
+*/
+
+drop table users cascade;
+drop table commands cascade;
+drop table access cascade;
+
+
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
@@ -38,7 +44,7 @@ INSERT INTO users values(
 CREATE TABLE IF NOT EXISTS commands (
   id SERIAL PRIMARY KEY,
   category VARCHAR(255) NOT NULL,
-  name VARCHAR(255) NOT NULL,
+  name VARCHAR(255) NOT NULL UNIQUE,
   func VARCHAR(255) NOT NULL,
   arg VARCHAR(255) NULL,
   return_file BOOLEAN NOT NULL,

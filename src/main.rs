@@ -12,6 +12,7 @@ use users::user_get_all::user_get_all;
 
 mod commands;
 use commands::command_get_all::command_get_all;
+use commands::command_create::command_create;
 
 pub struct AppState {
     db: Pool<Postgres>
@@ -46,6 +47,7 @@ async fn main() -> std::io::Result<()> {
             .service(user_update)
             .service(user_get_all)
             .service(command_get_all)
+            .service(command_create)
     })
     .bind(("0.0.0.0", 8080))?
     .run()
