@@ -1,17 +1,18 @@
 use actix_web::{web::Data, get, Responder, HttpResponse, HttpRequest};
 use crate::AppState;
 use serde::Serialize;
-use sqlx::{self, FromRow, query_scalar};
+use sqlx::{FromRow, query_scalar, query_as};
+
 
 #[derive(Serialize, FromRow)]
 struct User {
-    id:          i32,
-    tg_id:       i64,
-    username:    String,
-    fio:         String,
-    groups:      String,
-    description: String,
-    active:      bool
+    pub guid:        String,
+    pub tg_id:       i64,
+    pub username:    String,
+    pub fio:         String,
+    pub groups:      String,
+    pub description: String,
+    pub active:      bool
 }
 
 #[get("/user_get_all")]
@@ -36,12 +37,10 @@ pub async fn user_get_all(state: Data<AppState>, req: HttpRequest) -> impl Respo
         return HttpResponse::BadRequest().json("Invalid token")
     }
 
-    match sqlx::query_as::<_, User>(
-        "SELECT
-            id, tg_id, username,
-            fio, groups, description,
-            active
-         FROM users")
+    match query_as::<_, User>("
+        SELECT 
+            cast(guid as varchar) as guid, tg_id, username, fio, groups, description, active
+        FROM users")
         .fetch_all(&state.db)
         .await
     {

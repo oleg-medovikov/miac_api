@@ -1,11 +1,11 @@
 use actix_web::{web::Data, get, Responder, HttpResponse, HttpRequest};
 use crate::AppState;
 use serde::Serialize;
-use sqlx::{self, FromRow, query_scalar};
+use sqlx::{FromRow, query_scalar, query_as};
 
-#[derive(Serialize, FromRow)]
+#[derive(Debug, Serialize, FromRow)]
 struct Command {
-    id:          i32,
+    guid:        String,
     category:    String,
     name:        String,
     func:        String,
@@ -37,16 +37,14 @@ pub async fn command_get_all(state: Data<AppState>, req: HttpRequest) -> impl Re
         return HttpResponse::BadRequest().json("Invalid token")
     }
 
-    match sqlx::query_as::<_, Command>(
-        "SELECT
-            id, category, name, func,
-            arg, return_file, ask_day,
-            active
-         FROM commands")
+    match query_as::<_, Command> ("
+        SELECT
+            cast(guid as varchar) as guid, category, name, func, arg, return_file, ask_day, active
+        FROM commands")
         .fetch_all(&state.db)
         .await
     {
-        Ok(commands) => HttpResponse::Ok().json(commands),
+        Ok(commands) =>  HttpResponse::Ok().json(commands),
         Err(error) => {
             println!("Failed to execute query: {}", error);
             HttpResponse::NotFound().json("No commands found")

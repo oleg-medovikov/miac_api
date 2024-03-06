@@ -40,13 +40,13 @@ pub async fn command_create(state: Data<AppState>,req: HttpRequest, new_command:
     }
 
     // Создаем нового пользователя в базе данных
-    let result:Result<i32, sqlx::Error> = query_scalar(
+    let result:Result<String, sqlx::Error> = query_scalar(
         r#"
         INSERT INTO commands (
             category, name, func, arg, return_file, ask_day, active
         )
         VALUES ($1, $2, $3, $4, $5, $6, $7)
-        RETURNING id;
+        RETURNING cast(guid as varchar);
         "#
     )
     .bind(new_command.category)

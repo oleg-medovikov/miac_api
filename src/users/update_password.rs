@@ -1,7 +1,7 @@
 use actix_web::{web, web::Data, put, Responder, HttpResponse, HttpRequest};
 use crate::AppState;
 use serde::Deserialize;
-use sqlx::{self, FromRow};
+use sqlx::{FromRow, query_as, query};
 use bcrypt::{hash, verify, DEFAULT_COST};
 
 
@@ -13,7 +13,7 @@ struct PasswordUpdate {
 
 #[derive(FromRow)]
 struct User {
-    id: i32, 
+    guid: String, 
     password_hash: String,
 }
 
@@ -35,15 +35,13 @@ pub async fn user_update_password(
     };
 
     // Ищем пользователя по токену
-    let user = sqlx::query_as!(
-        User,
+    let user = query_as::<_, User>(
         r#"
-        SELECT id, password_hash 
+        SELECT cast(guid as varchar) as guid, password_hash 
         FROM users
         WHERE token = $1
-        "#,
-        token
-    )
+        "#)
+    .bind(token)
     .fetch_one(&state.db)
     .await
     .expect("Failed to execute query");
@@ -55,15 +53,9 @@ pub async fn user_update_password(
             let new_hashed_password = hash(password_update.new_password.as_bytes(), DEFAULT_COST).unwrap();
 
             // Обновляем пароль пользователя в базе данных
-            sqlx::query!(
-                r#"
-                UPDATE users
-                SET password_hash = $1
-                WHERE id = $2
-                "#,
-                new_hashed_password,
-                user.id
-            )
+            query(r#"UPDATE users SET password_hash = $1 WHERE guid = $2"#)
+            .bind(new_hashed_password)
+            .bind(user.guid)
             .execute(&state.db)
             .await
             .expect("Failed to update user password");

@@ -14,17 +14,16 @@ DO
   $do$;
 COMMIT;
 */
-
+/*
 drop table users cascade;
 drop table commands cascade;
 drop table access cascade;
-
-
+*/
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 CREATE TABLE IF NOT EXISTS users (
-  id SERIAL PRIMARY KEY,
+  guid UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   tg_id BIGINT NOT NULL UNIQUE,
   username VARCHAR(255) NOT NULL UNIQUE,
   password_hash VARCHAR(255) NOT NULL,
@@ -36,13 +35,13 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 INSERT INTO users values(
-  1, 200712816, 'MedovikovOE',
+  uuid_generate_v4(), 200712816, 'MedovikovOE',
   '$2b$12$W4pxNBAhbY9iHDf/XLndUOufVngbPERmFGbhzLLpbKOd/zLGHYxCO',
   'Медовиков О.Е.', 'admin', 'Автор', true, NULL
 ) ON CONFLICT DO NOTHING;
 
 CREATE TABLE IF NOT EXISTS commands (
-  id SERIAL PRIMARY KEY,
+  guid UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   category VARCHAR(255) NOT NULL,
   name VARCHAR(255) NOT NULL UNIQUE,
   func VARCHAR(255) NOT NULL,
@@ -53,21 +52,20 @@ CREATE TABLE IF NOT EXISTS commands (
 );
 
 CREATE TABLE IF NOT EXISTS access (
-  client SERIAL, 
-  command SERIAL,
+  client UUID, 
+  command UUID,
   coment VARCHAR(255) NULL,
-  FOREIGN KEY (client) REFERENCES users(id),
-  FOREIGN KEY (command) REFERENCES commands(id)
+  FOREIGN KEY (client) REFERENCES users(guid),
+  FOREIGN KEY (command) REFERENCES commands(guid)
 );
 
 CREATE TABLE IF NOT EXISTS dirs (
-  id SERIAL PRIMARY KEY,
+  guid UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   name VARCHAR(255) NOT NULL,
   directory TEXT NOT NULL,
   description TEXT NOT NULL,
   active BOOLEAN NOT NULL
 );
-
 
 CREATE TABLE IF NOT EXISTS binarys(
   guid UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -88,21 +86,20 @@ CREATE TABLE IF NOT EXISTS messages (
   message TEXT NOT NULL UNIQUE
 );
 
-
 CREATE TABLE IF NOT EXISTS tasks (
   guid UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   time_create TIMESTAMP NOT NULL DEFAULT NOW(),
-  client SERIAL NOT NULL,
+  client UUID NOT NULL,
   scheduler BOOLEAN NOT NULL,
-  command SERIAL NOT NULL,
+  command UUID NOT NULL,
   func VARCHAR(255) NOT NULL,
   arg VARCHAR(255) NULL,
   users_list BIGINT[],
   time_start TIMESTAMP NULL,
   time_stop  TIMESTAMP NULL,
   message UUID NULL,
-  FOREIGN KEY (client) REFERENCES users(id),
-  FOREIGN KEY (command) REFERENCES commands(id),
+  FOREIGN KEY (client) REFERENCES users(guid),
+  FOREIGN KEY (command) REFERENCES commands(guid),
   FOREIGN KEY (message) REFERENCES messages(guid)
 );
 

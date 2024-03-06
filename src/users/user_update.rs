@@ -1,10 +1,11 @@
 use actix_web::{web, web::Data, put, Responder, HttpResponse, HttpRequest};
 use crate::AppState;
 use serde::Deserialize;
+use sqlx::query_scalar;
 
 #[derive(Deserialize)]
 struct UpdateUser {
-    id:          i32,
+    guid:        String,
     tg_id:       i64,
     username:    String,
     fio:         String,
@@ -43,7 +44,7 @@ pub async fn user_update(state: Data<AppState>,req: HttpRequest, update_user: we
     }
 
     // Создаем нового пользователя в базе данных
-    let user_id: i32 = sqlx::query_scalar!(
+    let user_guid:String = query_scalar(
         r#"
         UPDATE users
             set tg_id = $2,
@@ -53,23 +54,22 @@ pub async fn user_update(state: Data<AppState>,req: HttpRequest, update_user: we
             description = $6,
             active = $7,
             token = null
-        where id = $1
-        RETURNING id
-        "#,
-        update_user.id,
-        update_user.tg_id,
-        update_user.username,
-        update_user.fio,
-        update_user.groups,
-        update_user.description,
-        update_user.active
-    )
+        where guid = $1
+        RETURNING cast(guid as varchar)
+        "#)
+    .bind(update_user.guid)
+    .bind(update_user.tg_id)
+    .bind(update_user.username)
+    .bind(update_user.fio)
+    .bind(update_user.groups)
+    .bind(update_user.description)
+    .bind(update_user.active)
     .fetch_one(&state.db)
     .await
     .expect("Failed to update user");
 
     HttpResponse::Created().json(serde_json::json!({
         "message": "User update successfully",
-        "user_id": user_id
+        "user_guid": user_guid
     }))
 }

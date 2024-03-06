@@ -1,6 +1,6 @@
 use actix_web::{web, web::Data, post, Responder, HttpResponse};
 use serde::Deserialize;
-use sqlx::{self,query_scalar};
+use sqlx::query_scalar;
 use crate::AppState;
 use bcrypt::verify;
 use uuid::Uuid;
