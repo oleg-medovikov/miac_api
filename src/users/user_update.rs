@@ -1,4 +1,4 @@
-use actix_web::{web, web::Data, put, Responder, HttpResponse, HttpRequest};
+use actix_web::{web, web::Data, post, Responder, HttpResponse, HttpRequest};
 use crate::AppState;
 use serde::Deserialize;
 use sqlx::query_scalar;
@@ -14,7 +14,7 @@ struct UpdateUser {
     active:      bool
 }
 
-#[put("/user_update")]
+#[post("/user_update")]
 pub async fn user_update(state: Data<AppState>,req: HttpRequest, update_user: web::Json<UpdateUser>) -> impl Responder {
     let update_user = update_user.into_inner();
     // Получаем токен пользователя из заголовка запроса
@@ -54,7 +54,7 @@ pub async fn user_update(state: Data<AppState>,req: HttpRequest, update_user: we
             description = $6,
             active = $7,
             token = null
-        where guid = $1
+        where cast(guid as varchar) = $1
         RETURNING cast(guid as varchar)
         "#)
     .bind(update_user.guid)
