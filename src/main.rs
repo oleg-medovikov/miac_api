@@ -11,6 +11,7 @@ use users::user_update::user_update;
 use users::user_get_all::user_get_all;
 use users::check_token::check_token;
 use users::user_get::user_get;
+use users::drop_token::drop_token;
 
 mod commands;
 use commands::command_get_all::command_get_all;
@@ -50,6 +51,7 @@ async fn main() -> std::io::Result<()> {
             .service(user_update)
             .service(user_get_all)
             .service(check_token)
+            .service(drop_token)
             .service(user_get)
             .service(command_get_all)
             .service(command_create)
