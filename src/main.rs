@@ -10,6 +10,7 @@ use users::user_create::user_create;
 use users::user_update::user_update;
 use users::user_get_all::user_get_all;
 use users::check_token::check_token;
+use users::user_get::user_get;
 
 mod commands;
 use commands::command_get_all::command_get_all;
@@ -22,6 +23,7 @@ pub struct AppState {
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     dotenv().ok();
+
     let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
     let pool = PgPool::connect(&database_url).await.expect("Не удалось подключиться к базе");
     // Выполняем миграции
@@ -48,6 +50,7 @@ async fn main() -> std::io::Result<()> {
             .service(user_update)
             .service(user_get_all)
             .service(check_token)
+            .service(user_get)
             .service(command_get_all)
             .service(command_create)
     })
