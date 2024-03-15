@@ -2,14 +2,13 @@ use actix_web::{web, web::Data, post, Responder, HttpResponse, HttpRequest};
 use crate::AppState;
 use serde::Deserialize;
 use bcrypt::{hash, DEFAULT_COST};
-use sqlx::{query_scalar};
+use sqlx::query_scalar;
 
 
 #[derive(Deserialize)]
 struct NewUser {
     tg_id:       i64,
     username:    String,
-    password:    String,
     fio:         String,
     groups:      String,
     description: String,
@@ -46,7 +45,7 @@ pub async fn user_create(state: Data<AppState>,req: HttpRequest, new_user: web::
     }
 
     // Генерируем хеш пароля
-    let hashed_password = hash(new_user.password.as_bytes(), DEFAULT_COST).unwrap();
+    let hashed_password = hash("123".as_bytes(), DEFAULT_COST).unwrap();
 
     // Создаем нового пользователя в базе данных
     let user_guid:String = query_scalar(
