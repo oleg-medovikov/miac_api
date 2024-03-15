@@ -16,6 +16,7 @@ use users::drop_token::drop_token;
 mod commands;
 use commands::command_get_all::command_get_all;
 use commands::command_create::command_create;
+use commands::command_update::command_update;
 
 pub struct AppState {
     db: Pool<Postgres>
@@ -55,6 +56,7 @@ async fn main() -> std::io::Result<()> {
             .service(user_get)
             .service(command_get_all)
             .service(command_create)
+            .service(command_update)
     })
     .bind(("0.0.0.0", 8080))?
     .run()

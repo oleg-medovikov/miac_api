@@ -12,6 +12,7 @@ struct NewCommand {
     arg:         Option<String>,
     return_file: bool,
     ask_day:     bool,
+    description: String,
     active:      bool
 }
 
@@ -43,9 +44,9 @@ pub async fn command_create(state: Data<AppState>,req: HttpRequest, new_command:
     let result:Result<String, sqlx::Error> = query_scalar(
         r#"
         INSERT INTO commands (
-            category, name, func, arg, return_file, ask_day, active
+            category, name, func, arg, return_file, ask_day, description, active
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
         RETURNING cast(guid as varchar);
         "#
     )
@@ -55,6 +56,7 @@ pub async fn command_create(state: Data<AppState>,req: HttpRequest, new_command:
     .bind(new_command.arg)
     .bind(new_command.return_file)
     .bind(new_command.ask_day)
+    .bind(new_command.description)
     .bind(new_command.active)
     .fetch_one(&state.db)
     .await;

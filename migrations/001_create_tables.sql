@@ -48,6 +48,7 @@ CREATE TABLE IF NOT EXISTS commands (
   arg VARCHAR(255) NULL,
   return_file BOOLEAN NOT NULL,
   ask_day BOOLEAN NOT NULL,
+  description TEXT NULL,
   active BOOLEAN NOT NULL
 );
 

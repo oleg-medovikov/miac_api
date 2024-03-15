@@ -12,6 +12,7 @@ struct Command {
     arg:         String,
     return_file: bool,
     ask_day:     bool,
+    description: String,
     active:      bool
 }
 
@@ -39,7 +40,7 @@ pub async fn command_get_all(state: Data<AppState>, req: HttpRequest) -> impl Re
 
     match query_as::<_, Command> ("
         SELECT
-            cast(guid as varchar) as guid, category, name, func, arg, return_file, ask_day, active
+            cast(guid as varchar) as guid, category, name, func, arg, return_file, ask_day, description, active
         FROM commands")
         .fetch_all(&state.db)
         .await
