@@ -5,6 +5,7 @@ use sqlx::query_scalar;
 
 #[derive(Deserialize)]
 struct UpdateCommand {
+    guid:        String,
     category:    String,
     name:        String,
     func:        String,
