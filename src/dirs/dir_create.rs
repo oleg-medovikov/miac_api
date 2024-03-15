@@ -5,20 +5,16 @@ use serde::Deserialize;
 use sqlx::query_scalar;
 
 #[derive(Deserialize)]
-struct NewCommand {
-    category:    String,
+struct NewDir {
     name:        String,
-    func:        String,
-    arg:         Option<String>,
-    return_file: bool,
-    ask_day:     bool,
-    description: String,
+    directory:   String,
+    description: Option<String>,
     active:      bool
 }
 
-#[post("/command_create")]
-pub async fn command_create(state: Data<AppState>,req: HttpRequest, new_command: web::Json<NewCommand>) -> impl Responder {
-    let new_command = new_command.into_inner();
+#[post("/dir_create")]
+pub async fn dir_create(state: Data<AppState>,req: HttpRequest, new_dir: web::Json<NewDir>) -> impl Responder {
+    let new_dir = new_dir.into_inner();
     // Получаем токен пользователя из заголовка запроса
     let token = match req.headers().get("Authorization") {
         Some(header_value) => match header_value.to_str() {
@@ -44,31 +40,27 @@ pub async fn command_create(state: Data<AppState>,req: HttpRequest, new_command:
     let result:Result<String, sqlx::Error> = query_scalar(
         r#"
         INSERT INTO commands (
-            category, name, func, arg, return_file, ask_day, description, active
+            name, directory, description, active
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        VALUES ($1, $2, $3, $4)
         RETURNING cast(guid as varchar);
         "#
     )
-    .bind(new_command.category)
-    .bind(new_command.name)
-    .bind(new_command.func)
-    .bind(new_command.arg)
-    .bind(new_command.return_file)
-    .bind(new_command.ask_day)
-    .bind(new_command.description)
-    .bind(new_command.active)
+    .bind(new_dir.name)
+    .bind(new_dir.directory)
+    .bind(new_dir.description)
+    .bind(new_dir.active)
     .fetch_one(&state.db)
     .await;
 
     match result {
         Ok(result) => { return HttpResponse::Created().json(json!({
-            "message": "Команда успешно создана!",
-            "command_guid": result
+            "message": "Директория успешно создана!",
+            "dir_guid": result
         }));
         },
         Err(_) => { return HttpResponse::BadRequest().json(json!({
-            "message": "Команда с таким именем уже существует!"
+            "message": "Директория с таким именем уже существует!"
         }));
         }
     }
