@@ -110,3 +110,10 @@ CREATE TABLE IF NOT EXISTS tasks_x_files (
   FOREIGN KEY (task) REFERENCES tasks(guid),
   FOREIGN KEY (file) REFERENCES files(guid)
 );
+
+CREATE TABLE IF NOT EXISTS users_x_files (
+  user_guid UUID NOT NULL, 
+  file UUID NOT NULL,
+  FOREIGN KEY (user_guid) REFERENCES users(guid),
+  FOREIGN KEY (file) REFERENCES files(guid)
+);

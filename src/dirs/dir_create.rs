@@ -39,7 +39,7 @@ pub async fn dir_create(state: Data<AppState>,req: HttpRequest, new_dir: web::Js
     // Создаем нового пользователя в базе данных
     let result:Result<String, sqlx::Error> = query_scalar(
         r#"
-        INSERT INTO commands (
+        INSERT INTO dirs (
             name, directory, description, active
         )
         VALUES ($1, $2, $3, $4)
