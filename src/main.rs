@@ -20,6 +20,7 @@ use commands::command_update::command_update;
 
 mod dirs;
 use dirs::dir_create::dir_create;
+use dirs::dir_get_all::dir_get_all;
 
 pub struct AppState {
     db: Pool<Postgres>
@@ -61,6 +62,7 @@ async fn main() -> std::io::Result<()> {
             .service(command_create)
             .service(command_update)
             .service(dir_create)
+            .service(dir_get_all)
     })
     .bind(("0.0.0.0", 8080))?
     .run()
