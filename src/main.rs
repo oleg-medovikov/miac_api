@@ -23,6 +23,9 @@ use dirs::dir_create::dir_create;
 use dirs::dir_get_all::dir_get_all;
 use dirs::dir_update::dir_update;
 
+//mod files;
+//use files::file_add::file_add;
+
 pub struct AppState {
     db: Pool<Postgres>
 }
@@ -65,6 +68,7 @@ async fn main() -> std::io::Result<()> {
             .service(dir_create)
             .service(dir_get_all)
             .service(dir_update)
+ //           .service(file_add)
     })
     .bind(("0.0.0.0", 8080))?
     .run()
