@@ -4,19 +4,16 @@ use serde::Serialize;
 use sqlx::{FromRow, query_scalar, query_as};
 
 #[derive(Debug, Serialize, FromRow)]
-struct Command {
-    guid:        String,
-    category:    String,
-    name:        String,
-    func:        String,
-    arg:         String,
-    return_file: bool,
-    ask_day:     bool,
-    active:      bool
+struct Access {
+    user_guid:    String,
+    user_fio:     String,
+    command_guid: String,
+    command_name: String,
+    description:  String
 }
 
-#[get("/command_get_all")]
-pub async fn command_get_all(state: Data<AppState>, req: HttpRequest) -> impl Responder {
+#[get("/access_get_all")]
+pub async fn access_get_all(state: Data<AppState>, req: HttpRequest) -> impl Responder {
     // Получаем токен пользователя из заголовка запроса
     let token = match req.headers().get("Authorization") {
         Some(header_value) => match header_value.to_str() {
@@ -32,22 +29,27 @@ pub async fn command_get_all(state: Data<AppState>, req: HttpRequest) -> impl Re
         .fetch_one(&state.db)
         .await
         .expect("Failed to execute query");
-
+    
     if !exists {
         return HttpResponse::BadRequest().json("Invalid token")
     }
 
-    match query_as::<_, Command> ("
-        SELECT
-            cast(guid as varchar) as guid, category, name, func, arg, return_file, ask_day, active
-        FROM commands")
+    match query_as::<_, Access> ("
+        SELECT 
+            cast(a.client as varchar) as user_guid, u.fio as user_fio,
+            cast(a.command as varchar) as command_guid, c.name as command_name,
+            a.coment as description
+        FROM access a
+            inner join users u on(a.client=u.guid)
+            inner join commands c on(a.command=c.guid);
+        ")
         .fetch_all(&state.db)
         .await
     {
-        Ok(commands) =>  HttpResponse::Ok().json(commands),
+        Ok(accesses) =>  HttpResponse::Ok().json(accesses),
         Err(error) => {
             println!("Failed to execute query: {}", error);
-            HttpResponse::NotFound().json("No commands found")
+            HttpResponse::NotFound().json("No access found")
         }
     }
 }
