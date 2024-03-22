@@ -59,6 +59,9 @@ CREATE TABLE IF NOT EXISTS access (
   FOREIGN KEY (client) REFERENCES users(guid),
   FOREIGN KEY (command) REFERENCES commands(guid)
 );
+ALTER TABLE access
+ADD CONSTRAINT unique_client_command UNIQUE (client, command);
+CREATE UNIQUE INDEX idx_unique_client_command ON access (client, command);
 
 CREATE TABLE IF NOT EXISTS dirs (
   guid UUID PRIMARY KEY DEFAULT uuid_generate_v4(),

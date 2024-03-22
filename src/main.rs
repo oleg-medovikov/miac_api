@@ -20,6 +20,7 @@ use commands::command_update::command_update;
 
 mod access;
 use access::access_get_all::access_get_all;
+use access::access_create::access_create;
 
 mod dirs;
 use dirs::dir_create::dir_create;
@@ -69,6 +70,7 @@ async fn main() -> std::io::Result<()> {
             .service(command_create)
             .service(command_update)
             .service(access_get_all)
+            .service(access_create)
             .service(dir_create)
             .service(dir_get_all)
             .service(dir_update)
