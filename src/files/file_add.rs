@@ -16,16 +16,19 @@ pub async fn file_add(state: Data<AppState>, req: HttpRequest, payload: Payload)
         None => return HttpResponse::BadRequest().json("Token not provided"),
     };
 
-
     // Ищем пользователя по токену
-    let guid: String = query_scalar(r#"SELECT cast(guid as varchar) FROM users WHERE token = $1"#)
+    let user_guid: String;
+    match query_scalar(r#"SELECT cast(guid as varchar) FROM users WHERE token = $1"#)
     .bind(token)
     .fetch_one(&state.db)
-    .await
-    .expect("Failed to execute query");
-
- // Create a new file in the /tmp directory
-    let tmp_path = std::path::Path::new("/tmp/").join(format!("{}.upload", guid));
+    .await{
+        Ok(Some(g)) => {user_guid = g;},
+        Ok(None) => return HttpResponse::NotFound().json("User not found"),
+        Err(_) => return HttpResponse::Forbidden().json("Database error")
+    };
+    
+    // Create a new file in the /tmp directory
+    let tmp_path = std::path::Path::new("/tmp/").join(format!("{}.upload", &user_guid));
     let mut tmp_file = match File::create(&tmp_path) {
         Ok(file) => file,
         Err(e) => return HttpResponse::InternalServerError().body(format!("Failed to create file: {}", e)),
@@ -43,6 +46,6 @@ pub async fn file_add(state: Data<AppState>, req: HttpRequest, payload: Payload)
     }
 
     // Return a successful response
-    HttpResponse::Ok().finish()
+    HttpResponse::Ok().json("File upload complete")
 }
 
