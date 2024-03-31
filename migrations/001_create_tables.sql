@@ -73,9 +73,10 @@ CREATE TABLE IF NOT EXISTS dirs (
 
 CREATE TABLE IF NOT EXISTS binarys(
   guid UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  file_hash TEXT NOT NULL,
+  file_hash TEXT NOT NULL UNIQUE,
   file_data BYTEA NOT NULL
 );
+-- ALTER TABLE binarys ADD CONSTRAINT unique_file_hash UNIQUE (file_hash);
 
 CREATE TABLE IF NOT EXISTS files (
   guid UUID PRIMARY KEY DEFAULT uuid_generate_v4(),

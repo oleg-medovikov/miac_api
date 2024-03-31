@@ -1,9 +1,10 @@
-use actix_web::{post, Responder, HttpResponse, HttpRequest};
-use actix_web::web::{Data, Payload, Bytes};
-use std::fs::File;
-use std::io::Write;
 use crate::AppState;
-use sqlx::query_scalar;
+use actix_web::web::{Bytes, Data, Payload};
+use actix_web::{post, HttpRequest, HttpResponse, Responder};
+use hex;
+use serde_json::json;
+use sha3::{Digest, Keccak256};
+use sqlx::{query_scalar, types::Uuid};
 
 #[post("/file_add")]
 pub async fn file_add(state: Data<AppState>, req: HttpRequest, payload: Payload) -> impl Responder {
@@ -17,35 +18,95 @@ pub async fn file_add(state: Data<AppState>, req: HttpRequest, payload: Payload)
     };
 
     // Ищем пользователя по токену
-    let user_guid: String;
-    match query_scalar(r#"SELECT cast(guid as varchar) FROM users WHERE token = $1"#)
+    let find_user: Option<Uuid> = query_scalar(
+        r#"
+        SELECT guid FROM users WHERE token = $1
+        "#,
+    )
     .bind(token)
     .fetch_one(&state.db)
-    .await{
-        Ok(Some(g)) => {user_guid = g;},
-        Ok(None) => return HttpResponse::NotFound().json("User not found"),
-        Err(_) => return HttpResponse::Forbidden().json("Database error")
-    };
-    
-    // Create a new file in the /tmp directory
-    let tmp_path = std::path::Path::new("/tmp/").join(format!("{}.upload", &user_guid));
-    let mut tmp_file = match File::create(&tmp_path) {
-        Ok(file) => file,
-        Err(e) => return HttpResponse::InternalServerError().body(format!("Failed to create file: {}", e)),
+    .await
+    .ok();
+
+    let user_guid: Uuid = match find_user {
+        Some(user) => user,
+        _ => return HttpResponse::NotFound().json("User not found"),
     };
 
-    // Read the entire payload into a Bytes type
-    let bytes:Bytes = match payload.to_bytes().await {
+    // Получаем имя файла из заголовка запроса
+    let file_name = match req.headers().get("X-File-Name") {
+        Some(header_value) => match header_value.to_str() {
+            Ok(file_name) => file_name.to_string(),
+            Err(_) => return HttpResponse::BadRequest().json("Invalid file name"),
+        },
+        None => return HttpResponse::BadRequest().json("File name not provided"),
+    };
+
+    // Читаем весь payload в тип Bytes
+    let bytes: Bytes = match payload.to_bytes().await {
         Ok(bytes) => bytes,
-        Err(e) => return HttpResponse::InternalServerError().body(format!("Error reading payload: {}", e)),
+        Err(e) => {
+            return HttpResponse::InternalServerError()
+                .body(format!("Error reading payload: {}", e))
+        }
     };
 
-    // Write the payload data to the file
-    if let Err(e) = tmp_file.write_all(&bytes) {
-        return HttpResponse::InternalServerError().body(format!("Error writing to file: {}", e));
-    }
+    // Инициализируем Sha256
+    let mut hasher = Keccak256::new();
+    // Добавляем данные payload в хешер
+    hasher.update(&bytes);
 
-    // Return a successful response
-    HttpResponse::Ok().json("File upload complete")
+    // Получаем итоговый хеш
+    let sha256_result = hasher.finalize();
+    let sha256_str = hex::encode(sha256_result);
+
+    // пробуем найти бинарник по хешу
+    let binary: Option<Uuid> = query_scalar(
+        r#"
+            SELECT guid from binarys where file_hash = $1
+        "#,
+    )
+    .bind(&sha256_str)
+    .fetch_one(&state.db)
+    .await
+    .ok();
+
+    let binary_guid: Uuid = match binary {
+        Some(binary) => binary,
+        _ => query_scalar(
+            r#"
+                INSERT INTO binarys (file_hash, file_data)
+                VALUES ($1, $2)
+                RETURNING guid;
+                "#,
+        )
+        .bind(&sha256_str)
+        .bind(bytes.as_ref())
+        .fetch_one(&state.db)
+        .await
+        .expect("не удалось записать файл"),
+    };
+
+    // записываем в таблицу files что мы получили файл
+    let file_guid: Uuid = query_scalar(
+        r#"
+        INSERT INTO FILES (name, file_bin)
+        VALUES($1,$2)
+        RETURNING guid;
+        "#,
+    )
+    .bind(file_name)
+    .bind(&binary_guid)
+    .fetch_one(&state.db)
+    .await
+    .expect("не удалось добавить запись о получении файла");
+
+    // сделать запись, кто именно добавил файл
+
+    HttpResponse::Ok().json(json!({
+        "SHA-256": sha256_str,
+        "user_guid": user_guid.to_string(),
+        "binary_guid": binary_guid.to_string(),
+        "file_guid": file_guid.to_string()
+    }))
 }
-
