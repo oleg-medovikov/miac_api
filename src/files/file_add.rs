@@ -4,7 +4,7 @@ use actix_web::{post, HttpRequest, HttpResponse, Responder};
 use hex;
 use serde_json::json;
 use sha3::{Digest, Keccak256};
-use sqlx::{query_scalar, types::Uuid};
+use sqlx::{query, query_scalar, types::Uuid};
 
 #[post("/file_add")]
 pub async fn file_add(state: Data<AppState>, req: HttpRequest, payload: Payload) -> impl Responder {
@@ -102,6 +102,16 @@ pub async fn file_add(state: Data<AppState>, req: HttpRequest, payload: Payload)
     .expect("не удалось добавить запись о получении файла");
 
     // сделать запись, кто именно добавил файл
+    query(
+        r#"
+        INSERT INTO users_x_files (user_guid, file) values($1,$2)
+        "#,
+    )
+    .bind(&user_guid)
+    .bind(&file_guid)
+    .execute(&state.db)
+    .await
+    .ok();
 
     HttpResponse::Ok().json(json!({
         "SHA-256": sha256_str,
