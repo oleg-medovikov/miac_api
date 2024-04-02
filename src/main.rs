@@ -30,6 +30,7 @@ use dirs::dir_update::dir_update;
 
 mod files;
 use files::file_add::file_add;
+use files::file_download::file_download;
 use files::file_get_list::file_get_list;
 
 pub struct AppState {
@@ -81,6 +82,7 @@ async fn main() -> std::io::Result<()> {
             .service(dir_update)
             .service(file_add)
             .service(file_get_list)
+            .service(file_download)
     })
     .bind(("0.0.0.0", 8080))?
     .run()
