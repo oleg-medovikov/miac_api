@@ -1,27 +1,27 @@
-use actix_web::{web::Data, App, HttpServer, http::header};
 use actix_cors::Cors;
+use actix_web::{http::header, web::Data, App, HttpServer};
 use dotenv::dotenv;
-use sqlx::{Pool, PgPool, Postgres};
+use sqlx::{PgPool, Pool, Postgres};
 
 mod users;
+use users::check_token::check_token;
+use users::drop_token::drop_token;
 use users::login::user_login;
 use users::update_password::user_update_password;
 use users::user_create::user_create;
-use users::user_update::user_update;
-use users::user_get_all::user_get_all;
-use users::check_token::check_token;
 use users::user_get::user_get;
-use users::drop_token::drop_token;
+use users::user_get_all::user_get_all;
+use users::user_update::user_update;
 
 mod commands;
-use commands::command_get_all::command_get_all;
 use commands::command_create::command_create;
+use commands::command_get_all::command_get_all;
 use commands::command_update::command_update;
 
 mod access;
-use access::access_get_all::access_get_all;
 use access::access_create::access_create;
 use access::access_delete::access_delete;
+use access::access_get_all::access_get_all;
 
 mod dirs;
 use dirs::dir_create::dir_create;
@@ -30,9 +30,10 @@ use dirs::dir_update::dir_update;
 
 mod files;
 use files::file_add::file_add;
+use files::file_get_list::file_get_list;
 
 pub struct AppState {
-    db: Pool<Postgres>
+    db: Pool<Postgres>,
 }
 
 #[actix_web::main]
@@ -40,7 +41,9 @@ async fn main() -> std::io::Result<()> {
     dotenv().ok();
 
     let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-    let pool = PgPool::connect(&database_url).await.expect("Не удалось подключиться к базе");
+    let pool = PgPool::connect(&database_url)
+        .await
+        .expect("Не удалось подключиться к базе");
     // Выполняем миграции
     sqlx::migrate!("./migrations")
         .run(&pool)
@@ -77,6 +80,7 @@ async fn main() -> std::io::Result<()> {
             .service(dir_get_all)
             .service(dir_update)
             .service(file_add)
+            .service(file_get_list)
     })
     .bind(("0.0.0.0", 8080))?
     .run()
