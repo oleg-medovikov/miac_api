@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Пользователи</title>
+    <link rel="icon" href="./static/img/miac_short.png">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
+    <link rel="stylesheet" href="./static/css/same.css">
+    <link rel="stylesheet" href="./static/css/commands.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
+</head>
+<body>
+
+  <header id="header" class="header">
+    <div class="container header__container">
+        <a href="https://spbmiac.ru/" target="_blank" class="logo_top">
+            <img class="logo__img" src="./static/img/miac.png" alt="Логотип">
+        </a>
+        <nav class="menu_top">
+          <div class="change-password-container">
+            <input type="password" id="newPasswordInput" placeholder="Новый пароль">
+            <button id="changePasswordButton">Изменить</button>
+        </div>
+            <ul class="menu__list">
+                <li id="UserFIO" class="menu__item"></li>
+                <li id="UserGroups" class="menu__item"></li>
+            </ul>
+        </nav>
+    </div>
+  </header>
+
+<aside class="aside_slidebar sidebar">
+  <div class="logo">
+  </div>
+  <ul class="links">
+    <!-- <h4>Основные</h4> -->
+    <li>
+      <span class="material-symbols-outlined">dashboard</span>
+      <a href="main.html">Доступ к командам</a>
+    </li>
+    <li>
+      <span class="material-symbols-outlined">person</span>
+      <a href="users.html">Пользователи</a>
+    </li>
+    <li>
+      <span class="material-symbols-outlined">pacemaker</span>
+      <a href="data.html">Доступ</a>
+    </li>
+    <hr>
+    <!-- <h4>Системные</h4> -->
+    <li>
+      <span class="material-symbols-outlined">ambient_screen</span>
+      <a href="file.html">Файлы</a>
+    </li>
+    <li>
+      <span class="material-symbols-outlined">monitoring</span>
+      <a href="directories.html">Директории</a>
+    </li>
+    <li>
+      <span class="material-symbols-outlined">flag</span>
+      <a href="commands.html">Команды</a>
+    </li>
+    <!-- <li>
+      <span class="material-symbols-outlined">pacemaker</span>
+      <a href="#">Theme Maker</a>
+    </li> -->
+    <hr>
+    <!-- <h4>Личное</h4> -->
+    <li>
+      <span class="material-symbols-outlined">mail</span>
+      <a href="https://mail.ru/?utm_source=portal&utm_medium=logo_portal_navigation&utm_campaign=mail.ru&mt_sub5=142510&mt_sub1=mail.ru&mt_click_id=mt-o4lsx4-1710880334-89398493">Почта</a>
+    </li>
+    <li class="logout-link">
+      <span class="material-symbols-outlined">logout</span>
+        <a id="logoutButton" href="#">Выход</a>        
+    </li>
+  </ul>
+</aside>
+
+  <h1 class="welcome">Команды</h1>
+
+  <!-- Модальное окно -->
+  <div id="editCommandModal" class="modal fade" role="dialog" style="display: none;">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title" id="CommandModalTitle">Добавить команду</h4>
+        </div>
+        <div class="modal-body">
+          <form id="editCommandForm" autocomplete="off">
+            <input type="hidden" id="guid" name="guid"> 
+ 
+            <div class="form-group">
+              <input type="text" id="category" name="category" placeholder="Категория">
+            </div>
+
+            <div class="form-group">
+              <input type="text" id="name" name="name" placeholder="Название">
+            </div>
+
+            <div class="form-group">
+              <input type="text" id="func" name="func" placeholder="Функция">
+            </div>
+
+            <div class="form-group">
+              <input type="text" id="arg" name="arg" placeholder="Аргументы">
+            </div>
+
+            <div class="form-group">
+                <select id="return_file" name="return_file">
+                    <option value="" disabled selected>Возврат файлов</option>
+                    <option value="true">Да</option>
+                    <option value="false">Нет</option>
+                  </select>
+            </div>
+
+            <div class="form-group">
+                <select id="ask_day" name="ask_day">
+                    <option value="" disabled selected>Спросить день</option>
+                    <option value="true">Да</option>
+                    <option value="false">Нет</option>
+                  </select>
+            </div>
+
+            <div class="form-group">
+                <textarea id="description" name="description" placeholder="Описание"></textarea>
+            </div>
+
+            <div class="form-group">
+              <select id="active" name="active">
+                <option value="" disabled selected>Активный</option>
+                <option value="true">Да</option>
+                <option value="false">Нет</option>
+              </select>
+            </div>
+
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="close-button" id="closeModalButton"></button>
+          <button type="button" class="minimalist-button" id="updateModalButton" style="display: none;">Обновить</button> 
+          <button type="button" class="minimalist-button" id="createModalButton" style="display: none;">Создать</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="interaction-elements">
+    <div class="wrapper_table_download">
+      <img src="./static/img/excel.png" class="export_btn" alt="Export to Excel" onclick="exportTableToExcel()">
+      <img src="./static/img/pdf.png" class="export_btn" alt="Export to PDF" onclick="exportTableToPDF()">
+    </div>
+    
+    <div class="filter">
+        <input type="search" class="search" id="search" autocomplete="off" placeholder="Поиск" onkeyup="searchTable()">
+    </div>
+  </div>
+  
+  <div class="wrapper">
+    <div class="command-table" id="commandTableContainer"></div>
+  </div>
+  
+  <script>
+  function exportTableToExcel() {
+    // Получаем элемент таблицы
+    var table = document.getElementById('commandTableContainer');
+  
+    // Получаем данные из таблицы
+    var data = [];
+    var rows = table.getElementsByTagName('tr');
+    for (var i = 0; i < rows.length; i++) {
+      var row = [];
+      var cells = rows[i].getElementsByTagName('td');
+      for (var j = 0; j < cells.length; j++) {
+        row.push(cells[j].innerText);
+      }
+      data.push(row);
+    }
+  
+    // Создаем объект workbook
+    var workbook = XLSX.utils.book_new();
+  
+    // Создаем объект worksheet
+    var worksheet = XLSX.utils.json_to_sheet(data);
+  
+    // Добавляем worksheet в workbook
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+  
+    // Записываем workbook в ArrayBuffer
+    var out = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+  
+    // Создаем blob из ArrayBuffer
+    var blob = new Blob([out], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  
+    // Создаем ссылку для скачивания
+    var link = document.createElement('a');
+    link.href = window.URL.createObjectURL(blob);
+    link.download = 'command.xlsx';
+    link.click();
+  
+    // Удаляем объект URL после использования
+    setTimeout(function() {
+      window.URL.revokeObjectURL(link.href);
+    }, 100);
+  }
+  </script>
+  
+  <script>
+    function searchTable() {
+        var input, filter, table, tr, td, i, txtValue;
+        input = document.getElementById("search");
+        filter = input.value.toUpperCase();
+        table = document.getElementById("commandTableContainer");
+        tr = table.getElementsByTagName("tr");
+    
+        for (i = 0; i < tr.length; i++) {
+            tr[i].style.display = ""; // По умолчанию показываем все строки
+            td = tr[i].getElementsByTagName("td");
+            for (var j = 0; j < td.length; j++) {
+                txtValue = td[j].textContent || td[j].innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    tr[i].style.display = "";
+                    break; // Выходим из цикла, если нашли совпадение
+                } else {
+                    tr[i].style.display = "none";
+                }
+            }
+        }
+    }
+  </script>
+
+
+<div id="addCommandModal" class="add-user-btn">
+  <a href="#"><img class="add-link" src="./static/img/icon_add.png" alt="add"></a>
+</div>
+
+<script type="module" src="./static/js/commands.js"></script>
+<script type="module" src="./static/js/logout.js"></script>
+
+
+</body>
+</html>

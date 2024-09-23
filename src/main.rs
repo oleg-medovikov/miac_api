@@ -1,7 +1,9 @@
-use actix_cors::Cors;
-use actix_web::{http::header, web::Data, App, HttpServer};
+//use actix_cors::Cors;
+use actix_web::{web, web::Data, App, HttpServer};
 use dotenv::dotenv;
 use sqlx::{PgPool, Pool, Postgres};
+use actix_files;
+
 
 mod users;
 use users::check_token::check_token;
@@ -33,6 +35,12 @@ use files::file_add::file_add;
 use files::file_download::file_download;
 use files::file_get_list::file_get_list;
 
+mod html;
+use html::login::login;
+use html::users::users;
+use html::commands::commands;
+use html::dirs::dirs;
+
 pub struct AppState {
     db: Pool<Postgres>,
 }
@@ -50,19 +58,33 @@ async fn main() -> std::io::Result<()> {
         .run(&pool)
         .await
         .expect("Не удалось создать таблицы");
-
-    let allowed_url = std::env::var("ALLOWED_URL").expect("ALLOWED_URL must be set");
+    
+    // CORS более не нужен
+    // let allowed_url = std::env::var("ALLOWED_URL").expect("ALLOWED_URL must be set");
 
     HttpServer::new(move || {
-        let cors = Cors::default()
-            .allowed_origin(&allowed_url)
-            .allowed_methods(vec!["GET", "POST"])
-            .allowed_headers(vec![header::AUTHORIZATION, header::ACCEPT])
-            .allowed_header(header::CONTENT_TYPE)
-            .max_age(3600);
+        //let cors = Cors::default()
+        //    .allowed_origin(&allowed_url)
+        //    .allowed_methods(vec!["GET", "POST"])
+        //    .allowed_headers(vec![header::AUTHORIZATION, header::ACCEPT])
+        //    .allowed_header(header::CONTENT_TYPE)
+        //    .max_age(3600);
         App::new()
-            .wrap(cors)
-            .app_data(Data::new(AppState { db: pool.clone() }))
+            //.wrap(cors)
+            .route("/", web::get().to(login))
+            .route("/login.html", web::get().to(login))
+            .route("/users.html", web::get().to(users))
+            .route("/commands.html", web::get().to(commands))
+            .route("/dirs.html", web::get().to(dirs))
+            .service(
+                actix_files::Files::new("/static", "static")
+                    .show_files_listing()
+                    .index_file("login.html")
+                    .index_file("users.html")
+                    .index_file("dirs.html")
+                    .index_file("commands.html"),
+            )
+            .app_data(Data::new(AppState { db: pool.clone() })) 
             .service(user_login)
             .service(user_update_password)
             .service(user_create)

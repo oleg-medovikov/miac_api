@@ -1,0 +1,48 @@
+input[type="text"],
+input[type="number"],
+textarea,
+select {
+	width: 100%;
+  	padding: 10px;
+  	border: 1px solid #ccc;
+  	border-radius: 4px;
+  	box-sizing: border-box;
+}
+
+.edit-command {
+	color: rgb(8, 8, 8); 
+	border: none; 
+	padding: 5px 8px; 
+	text-align: center; 
+	text-decoration: none; 
+	display: inline-block; 
+	font-size: 16px; 
+	margin: 4px 2px; 
+	cursor: pointer; 
+	border-radius: 5px; 
+	transition: background-color 0.3s ease;
+}
+  
+.edit-command:hover {
+	background-color: #d3d4d5;
+}
+
+.command-table {
+	display: flex;
+	justify-content: center; 
+	align-items: center; 
+	transition: .5s;
+	margin-top: 7px;
+}
+
+.command-table th,
+.command-table td {
+	border-top: 1px solid #8c8c8c;
+	padding: 8px;
+	text-align: center;
+}
+
+.command-table th {
+	background-color: #f5f0f0;
+}
+
