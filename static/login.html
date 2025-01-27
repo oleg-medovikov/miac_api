@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Вход в систему</title>
+  <link rel="stylesheet" href="https://unpkg.com/xp.css">
+  <style>
+    body {
+      background: #008080;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      font-family: 'MS Sans Serif', sans-serif;
+    }
+
+    .login-container {
+      width: 320px;
+      transition: width 0.3s ease, height 0.3s ease;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .window {
+      margin: 20px;
+      transition: height 0.3s ease;
+    }
+
+    .window-body {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+
+    .field-row {
+      display: flex;
+      align-items: center;
+      margin: 10px 0;
+    }
+
+    .field-row label {
+      width: 100px;
+      margin-right: 10px;
+    }
+
+    .field-row input,
+    .field-row select {
+      flex: 1;
+    }
+
+    .login-btn {
+      width: 100%;
+      margin-top: 15px;
+    }
+
+    .window-body.collapsed {
+      max-height: 0;
+      padding: 0;
+      border: none;
+    }
+
+    .login-container.fullscreen {
+      width: 100vw;
+      height: 100vh;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      top: 0;
+      left: 0;
+      transform: none;
+    }
+
+    .login-container.fullscreen .window {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+    }
+
+    .login-container.hidden {
+      display: none;
+    }
+
+    .title-bar {
+      cursor: move;
+    }
+
+    /* Стили для модального окна ошибки */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal .window {
+      width: 300px;
+      margin: 0;
+    }
+
+    .error-content {
+      display: flex;
+      align-items: center;
+      padding: 16px;
+      gap: 16px;
+    }
+
+    .error-icon {
+      width: 32px;
+      height: 32px;
+      flex-shrink: 0;
+    }
+
+    .error-text {
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .error-buttons {
+      text-align: center;
+      padding: 0 16px 16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container" id="loginContainer">
+    <div class="window">
+      <div class="title-bar" id="titleBar">
+        <div class="title-bar-text">Вход в систему</div>
+        <div class="title-bar-controls">
+          <button aria-label="Minimize" id="minimizeBtn">_</button>
+          <button aria-label="Maximize" id="maximizeBtn">□</button>
+          <button aria-label="Close" id="closeBtn">×</button>
+        </div>
+      </div>
+      <div class="window-body" id="windowBody">
+        <form id="loginForm">
+          <div class="field-row">
+            <label for="username">Логин:</label>
+            <input type="text" id="username" class="full-width"/>
+          </div>
+          <div class="field-row">
+            <label for="password">Пароль:</label>
+            <input type="password" id="password" class="full-width"/>
+          </div>
+          <div class="field-row">
+            <label for="role">Роль:</label>
+            <select id="role">
+              <option>Пользователь</option>
+              <option>Администратор</option>
+              <option>Гость</option>
+            </select>
+          </div>
+          <button type="submit" class="login-btn">Войти</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+    <div id="errorModal" class="modal">
+    <div class="window">
+      <div class="title-bar">
+        <div class="title-bar-text">Fatal Error</div>
+        <div class="title-bar-controls">
+          <button aria-label="Close" class="close-modal">×</button>
+        </div>
+      </div>
+      <div class="window-body">
+        <div class="error-content">
+          <canvas id="errorIcon" width="32" height="32"></canvas>
+          <div class="error-text">NET_SendPacket ERROR: NO ERROR
+          </div>
+        </div>
+        <div class="error-buttons">
+          <button class="btn close-modal">OK</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('errorIcon');
+    const ctx = canvas.getContext('2d');
+    
+    // Рисуем выпуклый красный круг
+    const gradient = ctx.createRadialGradient(16, 16, 0, 16, 16, 14);
+    gradient.addColorStop(0, '#ff6666');
+    gradient.addColorStop(1, '#cc0000');
+    
+    ctx.beginPath();
+    ctx.arc(16, 16, 14, 0, Math.PI * 2);
+    ctx.fillStyle = gradient;
+    ctx.fill();
+    
+    // Рисуем белый крест с тенью
+    ctx.strokeStyle = 'white';
+    ctx.lineWidth = 2;
+    
+    // Основные линии креста
+    ctx.beginPath();
+    ctx.moveTo(10, 10);
+    ctx.lineTo(22, 22);
+    ctx.moveTo(22, 10);
+    ctx.lineTo(10, 22);
+    ctx.stroke();
+    
+    // Тень для объема
+    ctx.strokeStyle = 'rgba(0,0,0,0.3)';
+    ctx.beginPath();
+    ctx.moveTo(11, 11);
+    ctx.lineTo(23, 23);
+    ctx.moveTo(23, 11);
+    ctx.lineTo(11, 23);
+    ctx.stroke();
+
+
+    document.getElementById('minimizeBtn').addEventListener('click', function() {
+      const windowBody = document.getElementById('windowBody');
+      windowBody.classList.toggle('collapsed');
+    });
+
+    document.getElementById('maximizeBtn').addEventListener('click', function() {
+      const loginContainer = document.querySelector('.login-container');
+      loginContainer.classList.toggle('fullscreen');
+    });
+
+    document.getElementById('closeBtn').addEventListener('click', function() {
+      const loginContainer = document.querySelector('.login-container');
+      loginContainer.classList.add('hidden');
+      document.getElementById('errorModal').style.display = "flex";
+    });
+
+    const titleBar = document.getElementById('titleBar');
+    const loginContainer = document.getElementById('loginContainer');
+
+    titleBar.addEventListener('mousedown', function(e) {
+      let offsetX = e.clientX - loginContainer.offsetLeft;
+      let offsetY = e.clientY - loginContainer.offsetTop;
+
+      function mouseMoveHandler(e) {
+        loginContainer.style.left = `${e.clientX - offsetX}px`;
+        loginContainer.style.top = `${e.clientY - offsetY}px`;
+      }
+
+      function mouseUpHandler() {
+        document.removeEventListener('mousemove', mouseMoveHandler);
+        document.removeEventListener('mouseup', mouseUpHandler);
+      }
+
+      document.addEventListener('mousemove', mouseMoveHandler);
+      document.addEventListener('mouseup', mouseUpHandler);
+    });
+
+    const modal = document.getElementById('errorModal');
+    const closeModalBtns = document.getElementsByClassName('close-modal');
+
+    for (let btn of closeModalBtns) {
+      btn.onclick = function() {
+        modal.style.display = "none";
+      }
+    }
+
+    window.onclick = function(event) {
+      if (event.target == modal) {
+        modal.style.display = "none";
+      }
+    }
+  </script>
+
+  <script type="module" src="login.js"></script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+CREATE TABLE IF NOT EXISTS users (
+    guid VARCHAR(25) PRIMARY KEY,
+    tg_id BIGINT NOT NULL UNIQUE,
+    username VARCHAR(255) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    fio VARCHAR(255) NOT NULL,
+    date_create TIMESTAMPTZ
+);

@@ -1,0 +1,26 @@
+body {
+  background: #008080;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  margin: 0;
+  font-family: 'MS Sans Serif', sans-serif;
+}
+.login-container {
+  width: 320px;
+}
+.window {
+  margin: 20px;
+}
+.field-row {
+  margin: 10px 0;
+}
+.login-btn {
+  width: 100%;
+  margin-top: 15px;
+}
+select {
+  width: 100%;
+  padding: 3px;
+}
