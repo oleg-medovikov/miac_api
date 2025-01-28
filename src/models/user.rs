@@ -12,10 +12,17 @@ pub struct User {
     pub date_create: DateTime<Utc>,
 }
 
+#[derive(Serialize, FromRow, Deserialize)]
+pub struct Role {
+    pub user_guid: String,
+    pub name: String,
+    pub token: String,
+}
+
 #[derive(Deserialize)]
 pub struct Credentials {
     pub username: String,
-    pub group: String,
+    pub role: String,
     pub password: String,
 }
 
@@ -23,5 +30,6 @@ pub struct Credentials {
 pub struct LoginResponse {
     pub message: String,
     pub token: String,
+    pub role: String,
 }
 
