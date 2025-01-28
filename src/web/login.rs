@@ -20,40 +20,60 @@ pub fn login_css() -> RawCss<String> {
 #[get("/login.js")]
 pub fn login_js() -> RawJavaScript<&'static str> {
     let content = r#"
-document.getElementById('loginForm').addEventListener('submit', async function(event) {
-  event.preventDefault(); // Предотвращаем отправку формы
+// Динамическая загрузка скрипта
+const loadAlertScript = () => {
+  return new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = 'XP_alert.js';
+    script.onload = resolve;
+    script.onerror = reject;
+    document.head.appendChild(script);
+  });
+};
 
+// Основной код приложения
+const initApp = async () => {
   try {
-    const response = await fetch('/api/user_login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        username: event.target.username.value,
-        password: event.target.password.value,
-        role: event.target.role.value,
-      }),
+    // Сначала загружаем скрипт
+    await loadAlertScript();
+    
+    // Затем инициализируем форму
+    document.getElementById('loginForm').addEventListener('submit', async function(event) {
+      event.preventDefault();
+      
+      try {
+        const response = await fetch('/api/user_login', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            username: event.target.username.value,
+            password: event.target.password.value,
+            role: event.target.role.value,
+          }),
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text()
+          alert(`Ошибка сервера: ${errorText}`);
+          return;
+        }
+
+        const data = await response.json();
+        localStorage.setItem('authToken', data.token);
+        window.location.href = '/';
+      } catch (error) {
+        console.error('Ошибка:', error);
+        alert('Ошибка входа. Проверьте учетные данные.');
+      }
     });
 
-    if (!response.ok) {
-      throw new Error(`Ошибка сервера: ${response.status} ${response.statusText}`);
-    }
-
-    const data = await response.json();
-
-    // Сохраняем токен в localStorage
-    localStorage.setItem('authToken', data.token);
-
-    // Перенаправляем пользователя на главную страницу
-    window.location.href = '/';
   } catch (error) {
-    console.error('Возникла проблема с операцией выборки:', error);
-
-    // Показываем пользователю сообщение об ошибке
-    alert('Ошибка входа. Пожалуйста, проверьте свои учетные данные.');
+    console.error('Не удалось загрузить XP_alert.js:', error);
   }
-});
+};
+
+// Запускаем приложение
+initApp();
     "#;
     RawJavaScript(content)
 }
