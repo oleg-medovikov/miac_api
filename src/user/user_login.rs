@@ -18,7 +18,7 @@ pub async fn user_login(pool: &State<PgPool>, credentials: Json<Credentials>) ->
 
     let user = match user {
         Some(h) => h,
-        None => return Err(Forbidden("Не найден user".to_string())),
+        None => return Err(Forbidden("Не существует такого пользователя".to_string())),
     };
     // проверяем наличие роли у данного пользователя
     let role: Option<Role> = query_as::<_, Role>(r#"SELECT * FROM roles WHERE user_guid = $1 and name = $2;"#)
@@ -30,7 +30,7 @@ pub async fn user_login(pool: &State<PgPool>, credentials: Json<Credentials>) ->
 
     let role = match role {
         Some(h) => h,
-        None => return Err(Forbidden("Не найден role".to_string())),
+        None => return Err(Forbidden("У данного пользователя нет такой доступной роли".to_string())),
     };
   
     // теперь проверяем хеш пароля
